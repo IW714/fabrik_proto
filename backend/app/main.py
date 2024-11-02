@@ -1,8 +1,12 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from .services.auth import verify_token
+from app.routes import fashn_routes
 
-app = FastAPI()
+app = FastAPI(
+    title="Fabrik - FASHN API",
+    description="API for interacting with FASHN AI service."
+)
 
 # Configure CROS
 origins = [
@@ -18,12 +22,13 @@ app.add_middleware(
     allow_headers=["*"],    # Allow all HTTP headers
 )
 
+app.include_router(fashn_routes.router)
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
 # Ex of protected route
-@app.get("/protected")
-def protected_route(user=Depends(verify_token)):
-    return {"message": f"Hello, {user['uid']}"}
+# @app.get("/protected")
+# def protected_route(user=Depends(verify_token)):
+#     return {"message": f"Hello, {user['uid']}"}

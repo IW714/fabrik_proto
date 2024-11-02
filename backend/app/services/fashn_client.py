@@ -25,7 +25,7 @@ class FashnClient:
 
     async def run_prediction(self, payload: RunPredictionRequest) -> RunPredictionResponse:
         url = f"{self.base_url}run"
-        response = await self.client.post(url, json=payload.dict())
+        response = await self.client.post(url, json=payload.model_dump(by_alias=True))
         response.raise_for_status()
         return RunPredictionResponse(**response.json())
 
