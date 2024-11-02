@@ -1,10 +1,13 @@
 import './App.css'
-import ThreeDText from './components/example'
+import HomePage from './pages/home'
+import Layout from './components/layout'
 
 function App() {
   return (
     <>
-      <ThreeDText />
+      <Layout>
+        <HomePage />
+      </Layout>
     </>
   )
 }
