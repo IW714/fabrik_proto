@@ -287,7 +287,6 @@ const CreatePrediction = () => {
     }, 1000); 
   };
 
-  
   const renderImageInput = ( // TODO: Separate this into a reusable component
     inputType: 'upload' | 'url',
     imageFile: File | null,
@@ -392,6 +391,51 @@ const CreatePrediction = () => {
         )}
       </>
     );
+  };
+
+  const EnhancedAlert = ({ // TODO: Separate this into a reusable component
+    visible, 
+    type = 'success', 
+    message = '', 
+    onClose 
+  }: {
+    visible: boolean;
+    type?: 'success' | 'error';
+    message: string;
+    onClose: () => void;
+  }) => {
+    return visible ? (
+      <Alert
+        variant={type === 'success' ? 'default' : 'destructive'}
+        className={`mt-4 relative border-l-4 shadow-md animate-slideIn
+          ${type === 'success' 
+            ? 'border-l-green-500 bg-green-50' 
+            : 'border-l-red-500 bg-red-50'}`}
+      >
+        <AlertCircle className={`h-4 w-4 ${
+          type === 'success' ? 'text-green-600' : 'text-red-600'
+        }`} />
+        <AlertTitle className={`font-semibold text-lg ${
+          type === 'success' ? 'text-green-800' : 'text-red-800'
+        }`}>
+          {type === 'success' ? 'Success' : 'Error'}
+        </AlertTitle>
+        <AlertDescription className={`mt-1 font-medium ${
+          type === 'success' ? 'text-green-700' : 'text-red-700'
+        }`}>
+          {message}
+        </AlertDescription>
+        <button
+          className={`absolute top-2 right-2 hover:bg-opacity-10 rounded-full p-1
+            ${type === 'success' 
+              ? 'text-green-600 hover:bg-green-600' 
+              : 'text-red-600 hover:bg-red-600'}`}
+          onClick={onClose}
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </Alert>
+    ) : null;
   };
 
   const resetModelOptions = () => {
@@ -591,22 +635,12 @@ const CreatePrediction = () => {
             </div>
           )}
 
-            {alertVisible && (
-              <Alert
-                variant={alertType === 'success' ? 'default' : 'destructive'}
-                className="mt-4 relative"
-              >
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>{alertType === 'success' ? 'Success' : 'Error'}</AlertTitle>
-                <AlertDescription>{alertMessage}</AlertDescription>
-                <button
-                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                  onClick={() => setAlertVisible(false)}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </Alert>
-            )}
+            <EnhancedAlert
+              visible={alertVisible}
+              type={alertType}
+              message={alertMessage}
+              onClose={() => setAlertVisible(false)}
+            />
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogContent className="sm:max-w-fit max-w-[95vw] p-4">
