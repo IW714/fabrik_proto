@@ -166,6 +166,32 @@ const CreatePrediction = () => {
       }
   };
 
+  const handleSaveImage = async (image_url: string) => {
+    try {
+      const response = await fetch('/api/save-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          image_url: image_url,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error saving image:", errorData);
+        throw new Error(errorData.detail?.message || 'Failed to save image');
+      }
+
+      const data = await response.json();
+      alert('Image saved successfully');
+    } catch (err) {
+      console.error(err);
+      alert((err as Error).message || 'An error occurred while saving image');
+    }
+  }
+
   const pollStatus = async (id: string) => {
     let attempts = 0;
     const maxAttempts = 300;
@@ -505,6 +531,14 @@ const CreatePrediction = () => {
                     alt={`Try-On Result ${index + 1}`}
                     className="object-contain w-full h-full"
                   />
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="absolute bottom-2 right-2"
+                    onClick={() => handleSaveImage(url)}
+                  >
+                    Save
+                  </Button>
                 </div>
               ))}
             </div>

@@ -1,14 +1,18 @@
+import { Routes, Route } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import Layout from './components/Layout'
+import SavedImages from './pages/SavedImages'
 import './App.css'
-import HomePage from './pages/home'
-import Layout from './components/layout'
+
 
 function App() {
   return (
-    <>
-      <Layout>
-        <HomePage />
-      </Layout>
-    </>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<HomePage />} />
+        <Route path="saved" element={<SavedImages />} />
+      </Route>
+    </Routes>
   )
 }
 

@@ -1,8 +1,9 @@
-import AppSideBar from './sidebar';
+import AppSideBar from './Sidebar';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { Outlet } from 'react-router-dom';
 
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout() {
   return (
     <SidebarProvider>
        <div className="flex">
@@ -15,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </header>
 
           <main className="flex-1 p-4 overflow-auto">
-            {children}
+            <Outlet />
           </main>
         </div>
       </div>
