@@ -20,7 +20,7 @@ import {
 import { Switch } from "../components/ui/switch";
 import { Progress } from "../components/ui/progress";
 import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
-import { IconFile, IconPhoto, IconPhotoScan } from '@tabler/icons-react';
+import { IconPhoto, IconPhotoScan } from '@tabler/icons-react';
 
 
 const CreatePrediction = () => {
@@ -123,39 +123,47 @@ const CreatePrediction = () => {
       } catch (err) {
         console.error(err);
         setError((err as Error).message || 'An error occurred');
-      } finally {
-        setLoading(false);
       }
   };
 
   const pollStatus = async (id: string) => {
     let attempts = 0;
     const maxAttempts = 20;
-
+  
     const interval = setInterval(async () => {
       if (attempts >= maxAttempts) {
         clearInterval(interval);
         setError('The prediction took too long to complete');
+        setLoading(false);
         return;
       }
-
+  
       attempts += 1;
-
+  
       try {
         const response = await fetch(`/api/fashn/status/${id}`);
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.detail?.message || 'An error occurred while polling status.');
+          throw new Error(
+            errorData.detail?.message || 'An error occurred while polling status.'
+          );
         }
-
-        const { status: currentStatus, output, error: predictionError } = await response.json();
+  
+        const {
+          status: currentStatus,
+          output,
+          error: predictionError,
+        } = await response.json();
         setStatus(currentStatus);
-
-        setProgress((attempts/maxAttempts) * 100);
-
-        if (currentStatus === 'completed') {
-          clearInterval(interval);
+  
+        if (currentStatus === 'starting') {
+          setProgress(33);
+        } else if (currentStatus === 'processing') {
+          setProgress(66);
+        } else if (currentStatus === 'completed') {
           setProgress(100);
+          clearInterval(interval);
+          setLoading(false);
           if (output && output.length > 0) {
             setImageUrls(output);
           } else {
@@ -163,15 +171,18 @@ const CreatePrediction = () => {
           }
         } else if (currentStatus === 'failed' || currentStatus === 'canceled') {
           clearInterval(interval);
+          setLoading(false);
           setError(predictionError?.message || 'Prediction failed or was canceled');
         }
       } catch (err) {
         console.error(err);
         clearInterval(interval);
+        setLoading(false);
         setError((err as Error).message || 'An error occurred while polling status.');
       }
-    }, 3000); // Poll every 5 seconds
+    }, 1000); 
   };
+
   
   const renderImageInput = ( // TODO: Separate this into a reusable component
     inputType: 'upload' | 'url',
