@@ -14,12 +14,12 @@ import { Link } from "react-router-dom"
 const items = [
     { 
         title: "Home",
-        url: "/",
+        url: "/home",
         icon: Home,
     },
     { 
         title: "Saved Images", 
-        url: "/saved",
+        url: "/home/saved",
         icon: FileImage,
     },
 ]
