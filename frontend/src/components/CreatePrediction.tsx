@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { 
     Card, 
@@ -17,11 +17,19 @@ import {
     SelectTrigger,
     SelectValue,
   } from "../components/ui/select";
+import {
+    Accordion,
+    AccordionItem,
+    AccordionTrigger,
+    AccordionContent
+} from "../components/ui/accordion";
+import { Slider } from "../components/ui/slider";
 import { Switch } from "../components/ui/switch";
 import { Progress } from "../components/ui/progress";
 import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
 import { IconPhoto, IconPhotoScan } from '@tabler/icons-react';
 
+// TODO: would be a good idea to refactor this entire thing into smaller components and util functions
 
 const CreatePrediction = () => {
   const [modelInputType, setModelInputType] = useState<"upload" | "url">('upload');
@@ -32,7 +40,24 @@ const CreatePrediction = () => {
   const [modelImageUrl, setModelImageUrl] = useState('');
   const [garmentImageUrl, setGarmentImageUrl] = useState('');
   
+  // Garment options
   const [category, setCategory] = useState('tops');
+  const [photoType, setPhotoType] = useState<'flat_lay' | 'model'>('model');
+
+  // Model options
+  const [coverFeet, setCoverFeet] = useState(false);
+  const [adjustHands, setAdjustHands] = useState(false);
+  const [restoreBackground, setRestoreBackground] = useState(false);
+  const [restoreClothes, setRestoreClothes] = useState(false);
+  const [longTop, setLongTop] = useState(false); // Only appears if category === 'tops'
+
+  // Preview options
+  const [guidanceScale, setGuidanceScale] = useState(2); // Default: 2, Range: 1.5-5
+  const [timesteps, setTimesteps] = useState(50); // Default: 50, Range: 10-50
+  const [seed, setSeed] = useState(42); // Default: 42 because why not
+  const [numSamples, setNumSamples] = useState(1); // Default: 1, Range: 1-4
+
+  // API state variables
   const [predictionId, setPredictionId] = useState<string | null>(null);
   const [status, setStatus] = useState<string>('idle');
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -40,7 +65,7 @@ const CreatePrediction = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
 
-  // Function to convert file to Base64
+
   const convertFileToBase64 = (file: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -79,13 +104,13 @@ const CreatePrediction = () => {
   
         if (garmentInputType === 'upload') {
           if (!garmentImageFile) {
-            setError('Please upload a garment image.');
+            setError('Please upload a clothing image.');
             return;
           }
           garmentImage = await convertFileToBase64(garmentImageFile);
         } else {
           if (!garmentImageUrl) {
-            setError('Please enter a garment image URL.');
+            setError('Please enter a clothing image URL.');
             return;
           }
           garmentImage = garmentImageUrl;
@@ -96,17 +121,32 @@ const CreatePrediction = () => {
         setImageUrls([]);
         setStatus('idle');
         setProgress(0);
+
+        const requestBody: any = {
+            model_image: modelImage,
+            garment_image: garmentImage,
+            category,
+            cover_feet: coverFeet,
+            adjust_hands: adjustHands,
+            restore_background: restoreBackground,
+            restore_clothes: restoreClothes,
+            flat_lay: photoType === 'flat_lay',
+            guidance_scale: guidanceScale,
+            timesteps,
+            seed,
+            num_samples: numSamples,
+        };
+
+        if (category === 'tops') {
+            requestBody.long_top = longTop;
+        };
   
         const response = await fetch('/api/fashn/run', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            model_image: modelImage,
-            garment_image: garmentImage,
-            category,
-          }),
+          body: JSON.stringify(requestBody),
         });
   
         if (!response.ok) {
@@ -128,7 +168,7 @@ const CreatePrediction = () => {
 
   const pollStatus = async (id: string) => {
     let attempts = 0;
-    const maxAttempts = 20;
+    const maxAttempts = 300;
   
     const interval = setInterval(async () => {
       if (attempts >= maxAttempts) {
@@ -290,6 +330,20 @@ const CreatePrediction = () => {
     );
   };
 
+  const resetModelOptions = () => {
+    setCoverFeet(false);
+    setAdjustHands(false);
+    setRestoreBackground(false);
+    setRestoreClothes(false);
+    setLongTop(false);
+  };
+  
+  const resetPredictionOptions = () => {
+    setGuidanceScale(2);
+    setTimesteps(50);
+    setSeed(42);
+    setNumSamples(1);
+  };
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 items-start">
@@ -308,6 +362,43 @@ const CreatePrediction = () => {
             setModelImageUrl,
             'Model Image'
           )}
+            <Accordion type="single" collapsible>
+            <AccordionItem value="model-options">
+                <AccordionTrigger>Advanced Options</AccordionTrigger>
+                <AccordionContent>
+                <div className="space-y-2 mt-4">
+                    <div className="flex items-center space-x-2">
+                    <Switch id="coverFeet" checked={coverFeet} onCheckedChange={setCoverFeet} />
+                    <Label htmlFor="coverFeet">Cover Feet</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                    <Switch id="adjustHands" checked={adjustHands} onCheckedChange={setAdjustHands} />
+                    <Label htmlFor="adjustHands">Adjust Hands</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                    <Switch
+                        id="restoreBackground"
+                        checked={restoreBackground}
+                        onCheckedChange={setRestoreBackground}
+                    />
+                    <Label htmlFor="restoreBackground">Restore Background</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                    <Switch
+                        id="restoreClothes"
+                        checked={restoreClothes}
+                        onCheckedChange={setRestoreClothes}
+                    />
+                    <Label htmlFor="restoreClothes">Restore Clothes</Label>
+                    </div>
+                </div>
+                <Button variant="secondary" onClick={resetModelOptions} className="mt-4">
+                    Reset to Default
+                </Button>
+                </AccordionContent>
+            </AccordionItem>
+            </Accordion>
+
         </CardContent>
       </Card>
 
@@ -324,20 +415,9 @@ const CreatePrediction = () => {
             garmentImageUrl,
             setGarmentImageFile,
             setGarmentImageUrl,
-            'Garment Image'
+            'Clothing Image'
           )}
-        </CardContent>
-      </Card>
-
-      {/* Prediction Form and Preview Card */}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle>Create Prediction</CardTitle>
-          <CardDescription>Configure and submit your try-on request</CardDescription>
-        </CardHeader>
-        <CardContent className="p-6 space-y-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2 text-sm w-full">
+          <div className="space-y-2 text-sm w-full">
               <Label htmlFor="category" className="text-sm font-medium">
                 Category
               </Label>
@@ -352,6 +432,38 @@ const CreatePrediction = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2 text-sm w-full">
+                <Label htmlFor="photoType" className="text-sm font-medium">
+                    Photo Type
+                </Label>
+                <Select onValueChange={(value) => setPhotoType(value as 'flat_lay' | 'model')} value={photoType}>
+                    <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a photo type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="model">Model</SelectItem>
+                    <SelectItem value="flat_lay">Flat Lay</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            {/* Conditionally render longTop switch if category is 'tops' */}
+            {category === 'tops' && (
+                <div className="flex items-center space-x-2">
+                    <Switch id="longTop" checked={longTop} onCheckedChange={setLongTop} />
+                    <Label htmlFor="longTop">Long Top</Label>
+                </div>
+            )}
+        </CardContent>
+      </Card>
+
+      {/* Prediction Form and Preview Card */}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Create Prediction</CardTitle>
+          <CardDescription>Configure and submit your try-on request</CardDescription>
+        </CardHeader>
+        <CardContent className="p-6 space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <Button type="submit" size="lg" disabled={loading}>
               {loading ? 'Submitting...' : 'Submit Prediction'}
             </Button>
@@ -402,6 +514,66 @@ const CreatePrediction = () => {
               <IconPhotoScan className="w-16 h-16 text-gray-400" />
             </div>
           )}
+
+            <Accordion type="single" collapsible>
+            <AccordionItem value="prediction-options">
+                <AccordionTrigger>Advanced Options</AccordionTrigger>
+                <AccordionContent>
+                <div className="space-y-4 mt-4">
+                    {/* guidance_scale slider */}
+                    <div className="space-y-2">
+                    <Label htmlFor="guidanceScale">Guidance Scale: {guidanceScale}</Label>
+                    <Slider
+                        id="guidanceScale"
+                        min={1.5}
+                        max={5}
+                        step={0.1}
+                        value={[guidanceScale]}
+                        onValueChange={(value) => setGuidanceScale(value[0])}
+                    />
+                    </div>
+                    {/* timesteps slider */}
+                    <div className="space-y-2">
+                    <Label htmlFor="timesteps">Timesteps: {timesteps}</Label>
+                    <Slider
+                        id="timesteps"
+                        min={10}
+                        max={50}
+                        step={1}
+                        value={[timesteps]}
+                        onValueChange={(value) => setTimesteps(value[0])}
+                    />
+                    </div>
+                    {/* seed input */}
+                    <div className="space-y-2">
+                    <Label htmlFor="seed">Seed</Label>
+                    <Input
+                        id="seed"
+                        type="number"
+                        value={seed}
+                        onChange={(e) => setSeed(parseInt(e.target.value) || 0)}
+                    />
+                    </div>
+                    {/* num_samples slider */}
+                    <div className="space-y-2">
+                    <Label htmlFor="numSamples">Number of Samples: {numSamples}</Label>
+                    <Slider
+                        id="numSamples"
+                        min={1}
+                        max={4}
+                        step={1}
+                        value={[numSamples]}
+                        onValueChange={(value) => setNumSamples(value[0])}
+                    />
+                    </div>
+                </div>
+                <Button variant="secondary" onClick={resetPredictionOptions} className="mt-4">
+                    Reset to Default
+                </Button>
+                </AccordionContent>
+            </AccordionItem>
+            </Accordion>
+
         </CardContent>
         <CardFooter className="justify-center">
           {/* TODO: add footers here if necessary */}
