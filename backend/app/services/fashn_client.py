@@ -6,6 +6,7 @@ from app.models.fashn_models import (
     CancelResponse
 )
 from dotenv import load_dotenv
+from fastapi.encoders import jsonable_encoder
 import os
 
 load_dotenv()
@@ -25,7 +26,8 @@ class FashnClient:
 
     async def run_prediction(self, payload: RunPredictionRequest) -> RunPredictionResponse:
         url = f"{self.base_url}run"
-        response = await self.client.post(url, json=payload.model_dump(by_alias=True))
+        json_payload = jsonable_encoder(payload, by_alias=True)
+        response = await self.client.post(url, json=json_payload)
         response.raise_for_status()
         return RunPredictionResponse(**response.json())
 

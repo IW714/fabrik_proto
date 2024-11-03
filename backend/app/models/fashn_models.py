@@ -1,12 +1,12 @@
-from pydantic import BaseModel, HttpUrl, Field
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 
 class RunPredictionRequest(BaseModel):
-    image: HttpUrl = Field(
+    image: str = Field(
         ...,
         alias="model_image",
         description="Image URL or base64 with prefix (e.g., data:image/jpg;base64,...)")
-    garment_image: HttpUrl = Field(
+    garment_image: str = Field(
         ..., 
         description="Image URL or base64 with prefix (e.g., data:image/jpg;base64,...)")
     category: str = Field(
@@ -60,7 +60,7 @@ class RunPredictionRequest(BaseModel):
 
 class RunPredictionResponse(BaseModel):
     id: str
-    status: str  # starting | in_queue | processing | completed | failed | canceled
+    error: Optional[Dict[str, str]] = None
 
 class StatusResponse(BaseModel):
     id: str
