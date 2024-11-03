@@ -55,7 +55,6 @@ const LandingPage = () => {
             >
               Get Started
             </Button>
-            <p className="text-xs text-gray-500">Starting at just $0.04 per image</p>
           </div>
         </div>
       </div>

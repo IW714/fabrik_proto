@@ -6,7 +6,18 @@
 
 ## 📖 Description
 
-Welcome to **Fabrik**! 
+Welcome to **Fabrik**! An innovative AI-powered fashion try-on platform that allows users to virtually try clothes on any model or themselves. Using FASHN AI's advanced technology, Fabrik enables you to:
+- Upload a photo of yourself or a model
+- Select any piece of clothing
+- Generate realistic try-on results instantly
+
+## 🎥 Demo
+
+[![Fabrik Demo](https://img.shields.io/badge/Watch%20Demo-Video-red.svg)](https://www.youtube.com/watch?v=umZYbDvAYm4)
+
+Watch our demo video to see Fabrik in action:
+
+[![Fabrik Demo](https://img.youtube.com/vi/umZYbDvAYm4/0.jpg)](https://www.youtube.com/watch?v=umZYbDvAYm4)
 
 ## Table of Contents
 
@@ -34,10 +45,11 @@ Welcome to **Fabrik**!
   - Fast development with ``Vite``
   - State management and component-based architecture
 
-- **Development Tools:**
-  - Virtual environment management with ``venv``
-  - Auto-reloading for both frontend and backend
-  - Environment variable configuration
+- **User Experience:**
+  - Intuitive interface
+  - Real-time preview
+  - Easy image upload system
+  - Result history tracking
 
 ## 🛠️ Tech Stack
 
@@ -49,11 +61,11 @@ Welcome to **Fabrik**!
 - **Backend**
   - [FastAPI](https://fastapi.tiangolo.com/)
   - [Uvicorn](https://www.uvicorn.org/)
+  - [FASHN AI API](https://docs.fashn.ai/)
 - **Auth**
-  - Fireauth
+  - TBD
 - **Hosting and Database**
-  - Firestore
-  - Firebase
+  - [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database)
 - **Others**
   - [Python 3.9](https://www.python.org/)
   - [Node.js 16.x](https://nodejs.org/)
@@ -65,6 +77,8 @@ Before you begin, ensure you have met the following requirements:
 
 - ``Python`` 3.9 or higher installed on your machine
 - ``Node.js`` and ``npm`` installed for frontend development
+- FASN AI API credentials
+- MongoDB Atlas account (for database)
 - [Git](https://git-scm.com/) for version control
 
 ## 🚀 Installation
@@ -72,8 +86,8 @@ Before you begin, ensure you have met the following requirements:
 1. **Clone the Repository:**
 
    ```bash
-   git clone https://github.com/IW714/react-vite-starter.git
-   cd react-vite-starter/backend
+   git clone https://github.com/IW714/fabrik-proto.git
+   cd fabrik-proto
    ```
 
 ### Backend Setup
@@ -177,7 +191,7 @@ Before you begin, ensure you have met the following requirements:
     npm run dev
     ```
     **Access the Frontend:**
-    - React App: http://localhost:5173/ (this may be different depening on what ports are available)
+    - React App: http://localhost:5173/ (this may be different depending on what ports are available)
 
 
 ## 🤝 Contributing

@@ -11,7 +11,7 @@ app = FastAPI(
     description="API for interacting with FASHN AI service."
 )
 
-# Configure CROS
+# Configure CORS
 origins = [
     "http://localhost:5173", 
 ]
