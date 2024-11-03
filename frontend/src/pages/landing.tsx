@@ -1,6 +1,6 @@
 // import { useState, useEffect } from 'react';
-import Gradient from '../components/Gradient';
 // import { TypeAnimation } from 'react-type-animation';
+import Gradient from '../components/Gradient';
 
 const LandingPage = () => {
     <>
