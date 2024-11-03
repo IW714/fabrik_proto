@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
 import { 
     Card, 
@@ -36,6 +36,7 @@ import { Slider } from "../components/ui/slider";
 import { Switch } from "../components/ui/switch";
 import { Progress } from "../components/ui/progress";
 import { Alert, AlertTitle, AlertDescription } from "../components/ui/alert";
+import { AlertCircle, X } from "lucide-react";
 import { IconPhoto, IconPhotoScan } from '@tabler/icons-react';
 
 // TODO: would be a good idea to refactor this entire thing into smaller components and util functions
@@ -78,6 +79,19 @@ const CreatePrediction = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState('');
 
+  // Alert state variables
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
+
+  useEffect(() => {
+    if (alertVisible) {
+      const timer = setTimeout(() => {
+        setAlertVisible(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [alertVisible]);
 
   const convertFileToBase64 = (file: Blob): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -192,16 +206,27 @@ const CreatePrediction = () => {
       })
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error saving image:", errorData);
-        throw new Error(errorData.detail?.message || 'Failed to save image');
+        let errorDetail = 'Failed to save image';
+        try {
+          const errorData = await response.json();
+          if (errorData.detail) {
+            errorDetail = errorData.detail;
+          }
+        } catch (e) {
+          errorDetail = await response.text();
+        }
+        throw new Error(errorDetail);
       }
-
+  
       const data = await response.json();
-      alert('Image saved successfully');
+      setAlertMessage('Image saved successfully');
+      setAlertType('success');
+      setAlertVisible(true);
     } catch (err) {
       console.error(err);
-      alert((err as Error).message || 'An error occurred while saving image');
+      setAlertMessage((err as Error).message || 'An error occurred while saving the image');
+      setAlertType('error');
+      setAlertVisible(true);
     }
   }
 
@@ -566,14 +591,31 @@ const CreatePrediction = () => {
             </div>
           )}
 
+            {alertVisible && (
+              <Alert
+                variant={alertType === 'success' ? 'default' : 'destructive'}
+                className="mt-4 relative"
+              >
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>{alertType === 'success' ? 'Success' : 'Error'}</AlertTitle>
+                <AlertDescription>{alertMessage}</AlertDescription>
+                <button
+                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => setAlertVisible(false)}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </Alert>
+            )}
+
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                  <DialogTitle>Image Preview</DialogTitle>
-                  <DialogClose />
-                </DialogHeader>
-                <div className="w-full">
-                  <img src={selectedImageUrl} alt="Selected" className="w-full h-auto" />
+              <DialogContent className="sm:max-w-fit max-w-[95vw] p-4">
+                <div className="flex items-center justify-center">
+                  <img
+                    src={selectedImageUrl}
+                    alt="Selected"
+                    className="w-auto h-auto max-h-[80vh] max-w-[calc(100vw-2rem)] object-contain"
+                  />
                 </div>
               </DialogContent>
             </Dialog>

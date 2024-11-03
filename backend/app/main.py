@@ -13,8 +13,7 @@ app = FastAPI(
 
 # Configure CROS
 origins = [
-    "http://localhost:5173", # React frontend
-    # Add other origins if needed
+    "http://localhost:5173", 
 ]
 
 app.add_middleware(
