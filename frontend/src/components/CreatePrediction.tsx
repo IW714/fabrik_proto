@@ -23,6 +23,15 @@ import {
     AccordionTrigger,
     AccordionContent
 } from "../components/ui/accordion";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "../components/ui/dialog"; // TODO: separate this into a reusable component
 import { Slider } from "../components/ui/slider";
 import { Switch } from "../components/ui/switch";
 import { Progress } from "../components/ui/progress";
@@ -64,6 +73,10 @@ const CreatePrediction = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+
+  // Dialog state variables
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState('');
 
 
   const convertFileToBase64 = (file: Blob): Promise<string> => {
@@ -498,8 +511,8 @@ const CreatePrediction = () => {
           {/* Display Progress */}
           {loading && (
             <div className="mt-4">
-                <Label>Processing:</Label>
-                <Progress value={progress} />
+              <Label>Processing:</Label>
+              <Progress value={progress} />
             </div>
           )}
 
@@ -524,15 +537,19 @@ const CreatePrediction = () => {
               {imageUrls.map((url, index) => (
                 <div
                   key={index}
-                  className="w-full h-64 overflow-hidden rounded-md bg-gray-100 mt-2 flex items-center justify-center"
+                  className="relative w-full h-64 overflow-hidden rounded-md bg-gray-100 mt-2 flex items-center justify-center"
                 >
                   <img
                     src={url}
                     alt={`Try-On Result ${index + 1}`}
                     className="object-contain w-full h-full"
+                    onClick={() => {
+                      setSelectedImageUrl(url);
+                      setIsDialogOpen(true);
+                    }}
                   />
                   <Button
-                    variant="secondary"
+                    variant="outline"
                     size="sm"
                     className="absolute bottom-2 right-2"
                     onClick={() => handleSaveImage(url)}
@@ -548,6 +565,19 @@ const CreatePrediction = () => {
               <IconPhotoScan className="w-16 h-16 text-gray-400" />
             </div>
           )}
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle>Image Preview</DialogTitle>
+                  <DialogClose />
+                </DialogHeader>
+                <div className="w-full">
+                  <img src={selectedImageUrl} alt="Selected" className="w-full h-auto" />
+                </div>
+              </DialogContent>
+            </Dialog>
+
 
             <Accordion type="single" collapsible>
             <AccordionItem value="prediction-options">
