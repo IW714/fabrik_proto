@@ -17,7 +17,7 @@ Welcome to **Fabrik**! An innovative AI-powered fashion try-on platform that all
 
 Watch the demo video to see Fabrik in action:
 
-[![Fabrik Demo](https://img.youtube.com/vi/umZYbDvAYm4/0.jpg)](https://www.youtube.com/watch?v=umZYbDvAYm4)
+[![Fabrik Demo](https://img.youtube.com/vi/vFxmFOdiQGI/0.jpg)](https://www.youtube.com/watch?v=vFxmFOdiQGI)
 
 ## Table of Contents
 
